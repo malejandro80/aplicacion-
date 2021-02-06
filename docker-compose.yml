@@ -1,0 +1,52 @@
+version: '3'
+services: 
+  backend:
+    image: backend-image
+    build: ./back
+    container_name: backend
+    restart: always
+    env_file: 
+      - ./back/.env.develop
+    ports: 
+      - "8000:8000"
+    volumes: 
+      - ./back:/app
+      - ./back/node_modules:/app/node_modules
+    depends_on: 
+      - mdb
+    networks: 
+      - app-network
+    command: sh -c "npm install && npm start"
+  frontend:
+    image: frontend-image
+    build: ./front
+    container_name: frontend
+    restart: always
+    stdin_open: true
+    env_file: 
+      - ./front/.env.develop
+    ports: 
+      - "3000:3000"
+    volumes: 
+      - ./front:/app
+      - ./front/node_modules:/app/node_modules
+    networks: 
+      - app-network
+    command: sh -c "npm install && npm start"
+  mdb:
+    image: mongo:4.0.22-xenial
+    container_name: mongodb
+    restart: always
+    volumes: 
+      - mongo-data:/data/db
+    ports:
+      - "2717:27017"
+    networks: 
+      - app-network
+networks: 
+  app-network:
+    driver: bridge
+volumes: 
+  mongo-data:
+    driver: local
+
